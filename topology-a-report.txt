@@ -1,0 +1,35 @@
+Topology of A:
+	
+Yes, it is possible to estimate the throughput and latency for links L1, L2, L3, and L4.
+
+L1: h1 - s1 - s2 - h3
+L2: h3 - s2 - s3 - h4 
+L3: h4 - s3 - s4 - h5 
+L4: h4 - s3 - s5 - h7 
+
+	h1 ping h3, to get the latency/RTT of L1
+		[86.7, 82.2, 80.9, 80.4, 80.0, 80.6, 80.4, 80.6, 81.1, 80.7] (ms)
+		Average Latency: 81.408 ms
+	iperf h1 h3, to get the throughput of L1
+		[18.2, 20.7] (Mbits/s)
+
+	h3 ping h4, to get the latency/RTT of L2
+		[22.1, 22.2, 21.1, 20.6, 20.9, 20.1, 20.0, 21.2, 21.0, 21.1] (ms)
+		Average Latency: 20.978 ms
+	iperf h3 h4, to get the throughput of L2
+		[36.8, 40.8] (Mbits/s)
+
+	h4 ping h5, to get the latency/RTT of L3
+		[42.5, 44.0, 40.2, 40.4, 40.6, 40.3, 42.0, 40.5, 40.8, 41.1] (ms)
+		Average Latency: 41.301 ms
+	iperf h4 h5, to get the throughput L3
+		[27.9, 31.1] (Mbits/s)
+
+	h4 ping h7, to get the latency/RTT of L4
+		[63.9, 62.1, 60.4, 60.1, 60.9, 60.4, 61.0, 61.3, 60.5, 60.8] (ms)
+		Average Latency: 61.175 ms
+	iperf h4 h7, to get the throughput of L4
+		[18.5, 20.8] (Mbits/s)
+
+
+Since the topology is symmetric and latency represents the sum of delay between links, we can determine the latency of the links between s1-s2, s2-s3, s3-s4, s3-s5 using the ping functionality in mininet. Because Average latency when h1 ping h3 is the roundtrip time, we can divide by two to get the one way latency. For instance, 81.408/2 = 40.704 ms for link L1. Therefore, we use the ping functionality to calculate the sum of delays between the links using their respective hosts to find the average latency between links L1, L2, L3, L4. To calculate the throughput of all the links, we use the iperf functionality to calculate the maximum bandwidth between the links. Similar to the latency, we use the respective hosts of the linkes L1, L2, L3, L4 to find the throughput of each link as the topology is symmetric. For instance, we use iperf h1 h3 to get the throughput of L1 ([18.2, 20.7] (Mbits/s)).

@@ -1,0 +1,31 @@
+To calculate latencies and throughput for all links between switches, start with pings between hosts.
+
+h1 ping h2, to get the latency between h1 - e1 - h2
+	Average latency(RTT): 41.183 ms
+h1 ping h3, to get the latency between h1 - e1 - a1 - e2 - h3
+	Average latency(RTT): 123.153 ms
+h1 ping h5, to get the latency between h1 - e1 - a1 - c1 - a2 - e3 - h5
+	Average latency(RTT): 245.546 ms
+h1 ping h8, to get the latency between h1 - e1 - a1 - c1 - a2 - e4 - h8
+	Average latency(RTT): 245.695 ms
+
+From here, we can calculate the one way latencies of all links between switches:
+	Level 2 links average one way latency is approximately 20.493 ms (Links: e1-a1, e2-a1, e3-a2, e4-a2)
+	Level 1 links average one way latency is approximately 30.598 ms (Links: a1-c1, a2-c1)
+
+The logic for calculating the one way latencies is:
+
+	Thus, since the topology is symmetric and latency represents the sum of delay between links, we can determine the latency of the links between e1-a1, e2-a1, e3-a2, e4-a2, a1-c1 and a2-c1. Because Average latency when h1 ping h2 is the roundtrip time, we can divide by two to get the one way latency.  41.183/2 = 20.592, and since this links spans two level three links, we can again divide by two to get the one way latency on a layer3 link.  20.592/2 = 10.296.
+	Now that we know the latency of the layer 3 links, we can determine the latency of the layer 2 links, e1-a1, e2-a1, e3-a2 and e4-a2.  Again, since the topology is symmetric, once we figure out the latency for one link we know that will be the latency for all the layer 2 links.  When h1 ping h3 the average latency is 123.153, but that represents total round trip time, so we divide by two to get the one way latency, 123.153/2 = 61.577.  We also know the path this ping took,  h1 - e1 - a1 - e2 - h3, and the latency of each of those layer 3 links will be 10.296.  Thus, since there are two layer 3 links in the path, we can subtract 2(10.296) from 61.577 to get the latency between e1-a1-e2, 61.577 - 2(10.296) = 40.985.  Thus, 40.985 is the one way latency between the switches e1-a1-e2.  Once again, because the topology is symmetric we can divide 40.985 by two to get the one way latency on a level 2 link, 40.985/2 = 20.493.  Thus, the latency for all level 2 links, e1-a1, e2-a1, e3-a2 and e4-a2, is approximately 20.493.
+	Since we know the latency of all level 3 and level 2 links, we can now determine the latency of the level 1 links, a1-c1 and a2-c1.  When h1 ping h5 the total round trip time is 245.546, which we can divide by 2 to get the one way latency since the topology is symmetric, 245.546/2 = 122.773.  Since we know the path of the ping,  h1 - e1 - a1 - c1 - a2 - e3 - h5, and we know the latency of all level 3 and level 2 links, we can subtract those latencies from 122.773 to get the latency between a1 - c1 - a2.  Since there are exactly 2 layer 3 links and 2 layer 2 links in the path  h1 - e1 - a1 - c1 - a2 - e3 - h5, we subtract 122.773 - 2(10.296) - 2(20.493) = 61.195.  Thus, the latency between a1 - c1 - a2 is 61.195, and we can divide that by 2 to get the one way latency of a level 1 link.  61.195/2 = 30.598, this the one way latency of all level 1 links is approximately 30.598.
+
+iperf h1 h2
+	Average throughput = [9.49, 10.9] Mbits/sec
+iperf h1 h3
+	Average throughput = [9.12, 11.0] Mbits/sec
+iperf h1 h5
+	Average throughput = [8.44, 11.0] Mbits/sec
+
+We know the average throughput for all level 3 links will be approximately 10 Mbits/sec based on the iperf h1 h2 command.  With the consideration that throughput is calculated between hosts (meaning the iperf command will run through level 3 links every time), we are unable to calculate the throughput of any level 2 or level 1 links, since the maximum throughput of the lowest layer, level 3 links, is only approximately 10 Mbits/sec.  Due to level 3 having the smallest throughput, we are only able to make a definitive statement about the minimum throughput of the upper two layers. The minimum throughput of level 1 and 2 is around 10 Mbits/sec because level 3 is maxed out at 10 Mbits/sec, which does not let us take advantage of the higher theoretical throughputs of level 1 and 2.
+
+
